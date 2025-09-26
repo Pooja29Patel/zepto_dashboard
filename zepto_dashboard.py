@@ -14,19 +14,24 @@ st.set_page_config(page_title="Zepto Dashboard", layout="wide")
 st.title("🛒 Zepto Product Analytics Dashboard")
 
 # ------------------------------------------------------
-# 2. Load Data from PostgreSQL
+# 2. Load Data from Neon PostgreSQL
 # ------------------------------------------------------
 @st.cache_data
 def load_data():
     conn = psycopg2.connect(
-        host="localhost",        
-        database="zepto SQL Project", 
-        user="postgres",    
-        password="2919zoshay" 
+        host="ep-solitary-hall-adtofe8l-pooler.c-2.us-east-1.aws.neon.tech",        
+        database="neondb", 
+        user="neondb_owner",    
+        password="npg_fK7GZVM3bBtq", 
+        port="5432",
+        sslmode="require"
     )
     query = "SELECT * FROM zepto;"
     df = pd.read_sql(query, conn)
     conn.close()
+
+    # Fix column names to match your table
+    df.columns = [c.lower() for c in df.columns]
 
     # Derived columns
     df['revenue'] = df['discountedsellingprice'] * df['availablequantity']
@@ -74,10 +79,10 @@ st.pyplot(fig)
 
 # B. Average Discount by Category
 st.subheader("Average Discount % by Category")
-avg_discount = df.groupby('category')['discountpercent'].mean().sort_values(ascending=False)
+avg_discount_cat = df.groupby('category')['discountpercent'].mean().sort_values(ascending=False)
 
 fig, ax = plt.subplots(figsize=(8,4))
-avg_discount.plot(kind='barh', color='orange', ax=ax)
+avg_discount_cat.plot(kind='barh', color='orange', ax=ax)
 ax.set_xlabel("Avg Discount %")
 st.pyplot(fig)
 
@@ -111,4 +116,4 @@ ax.invert_yaxis()
 ax.set_xlabel("Discount %")
 st.pyplot(fig)
 
-st.markdown("✅ Dashboard built with Streamlit, Matplotlib, and PostgreSQL.")
+st.markdown("✅ Dashboard built with Streamlit, Matplotlib, and Neon PostgreSQL.")
